@@ -2,6 +2,8 @@
 In this assignment you should interpolate the given function.
 """
 
+
+
 import numpy as np
 import time
 import random
@@ -17,7 +19,7 @@ class Assignment1:
         starting to interpolate arbitrary functions.
         """
 
-        pass
+        self.interpolated_dict = None
 
     def interpolate(self, f: callable, a: float, b: float, n: int) -> callable:
         """
@@ -59,7 +61,7 @@ class Assignment1:
         for i in range(0, n):
             _x = points_x_values.item(i)
             points_values[i] = [_x, f(_x)]
-
+        self.interpolated_dict = self.final_poly(points_values)
         return lambda x: self.x_location(x, points_values)
 
     # find the a & b points
@@ -107,11 +109,10 @@ class Assignment1:
         return self.get_bezier_cubic(points)
 
     def x_location(self, value_of_x, points):
-        interpolated_dict = self.final_poly(points)
         start_point = 0
         end_point = 0
 
-        for key, val in interpolated_dict.items():
+        for key, val in self.interpolated_dict.items():
             if start_point == 0:
                 start_point = key
             if value_of_x > key[0]:
@@ -121,7 +122,7 @@ class Assignment1:
 
         normal_x = (value_of_x - start_point[0])/(end_point[0] - start_point[0])
 
-        return interpolated_dict[start_point](normal_x)
+        return self.interpolated_dict[start_point](normal_x)[1]
 
 
 # if __name__ == "__main__":
