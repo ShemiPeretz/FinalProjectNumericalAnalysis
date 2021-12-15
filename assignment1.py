@@ -71,21 +71,30 @@ class Assignment1:
         # then n must be this:
         n = len(points) - 1  # TODO: give "n" as a parameter to the function, replace the initialization
 
-        # build coefficents matrix
-        C = 4 * np.identity(n)
-        np.fill_diagonal(C[1:], 1)
-        np.fill_diagonal(C[:, 1:], 1)
-        C[0, 0] = 2
-        C[n - 1, n - 1] = 7
-        C[n - 1, n - 2] = 2
+        # build coefficients matrix
+        # C = 4 * np.identity(n)
+        # np.fill_diagonal(C[1:], 1)
+        # np.fill_diagonal(C[:, 1:], 1)
+        # C[0, 0] = 2
+        # C[n - 1, n - 1] = 7
+        # C[n - 1, n - 2] = 2
 
         # build points vector
         P = [2 * (2 * points[i] + points[i + 1]) for i in range(n)]
         P[0] = points[0] + 2 * points[1]
         P[n - 1] = 8 * points[n - 1] + points[n]
 
+        # creating arrays for coefficients
+        c = np.ones(n-1)
+        b = np.full(n-1, 4)
+        b[0] = 2
+        b[n-1] = 7
+        a = np.full(n-1, 1)
+        a[n-1] = 2
+
+        A = self.TDMAsolver(a, b, c, P)
         # solve system, find a & b
-        A = np.linalg.solve(C, P)  # TODO: change to thomas algo!
+        # A = np.linalg.solve(C, P)  # TODO: change to thomas algo!
         B = [0] * n
         for i in range(n - 1):
             B[i] = 2 * points[i + 1] - A[i + 1]
@@ -112,7 +121,7 @@ class Assignment1:
         start_point = 0
         end_point = 0
 
-        for key, val in self.interpolated_dict.items():
+        for key, val in self.interpolated_dict.items():  # TODO: Check End Point
             if start_point == 0:
                 start_point = key
             if value_of_x > key[0]:
@@ -123,6 +132,23 @@ class Assignment1:
         normal_x = (value_of_x - start_point[0])/(end_point[0] - start_point[0])
 
         return self.interpolated_dict[start_point](normal_x)[1]
+
+    def TDMAsolver(self, a, b, c, d):
+        nf = len(a)  # number of equations
+        ac, bc, cc, dc = map(np.array, (a, b, c, d))  # copy the array
+        for it in range(1, nf):
+            mc = ac[it] / bc[it - 1]
+            bc[it] = bc[it] - mc * cc[it - 1]
+            dc[it] = dc[it] - mc * dc[it - 1]
+
+        xc = ac
+        xc[-1] = dc[-1] / bc[-1]
+
+        for il in range(nf - 2, -1, -1):
+            xc[il] = (dc[il] - cc[il] * xc[il + 1]) / bc[il]
+
+        del bc, cc, dc  # delete variables from memory
+        return xc
 
 
 # if __name__ == "__main__":
