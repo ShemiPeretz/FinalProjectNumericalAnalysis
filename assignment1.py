@@ -119,6 +119,7 @@ class Assignment1:
                 start_point = key
             else:
                 end_point = key
+                break
 
         normal_x = (value_of_x - start_point[0])/(end_point[0] - start_point[0])
 
