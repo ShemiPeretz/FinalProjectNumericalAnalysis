@@ -92,9 +92,9 @@ class Assignment1:
         a = np.ones(n)
         a[n-1] = 2
 
-        a_c_points = self.TDMAsolver(a, b, c, P)
+        a_c_points = self.thomas(a, b, c, P)
         # solve system, find a & b
-        # A = np.linalg.solve(C, P)  # TODO: change to thomas algo!
+        # a_c_points = np.linalg.solve(C, P)  # TODO: change to thomas algo!
         B = [0] * n
         for i in range(n - 1):
             B[i] = 2 * points[i + 1] - a_c_points[i + 1]
@@ -130,7 +130,10 @@ class Assignment1:
                 end_point = key
                 break
 
-        normal_x = (value_of_x - start_point[0])/(end_point[0] - start_point[0])
+        if value_of_x == start_point[0] or end_point[0] == start_point[0]:
+            normal_x = 0
+        else:
+            normal_x = (value_of_x - start_point[0])/(end_point[0] - start_point[0])
 
         return self.interpolated_dict[start_point](normal_x)[1]
 
@@ -156,24 +159,53 @@ class Assignment1:
         del cMiddle, cUpper, cVector  # delete variables from memory
         return xc
 
+    def thomas(self, lower, middle, upper, points_vector):
+        equations_num = len(lower)
+        for i in range(0, equations_num):
+            dx = points_vector[i][0]
+            dy = points_vector[i][1]
+            prev_d_x = points_vector[i-1][0]
+            prev_d_y = points_vector[i-1][1]
+
+            m = lower[i-1]/middle[i-1]
+            middle[i] = middle[i] - m * upper[i-1]
+            dx2 = dx - m * prev_d_x
+            dy2 = dy - m * prev_d_y
+
+            points_vector[i] = [dx2, dy2]
+
+        last_cpx = points_vector[-1][0] / middle[-1]
+        last_cpy = points_vector[-1][1] / middle[-1]
+        x = points_vector
+        x[-1] = [last_cpx, last_cpy]
+
+        for i in range(equations_num-2, -1, -1):
+            cp_x = (points_vector[i][0] - upper[i] * x[i+1][0]) / middle[i]
+            cp_y = (points_vector[i][1] - upper[i] * x[i+1][1]) / middle[i]
+            x[i] = [cp_x, cp_y]
+        return x
+
+
 # Ploting For Testing use TODO: remove before flight
 # if __name__ == "__main__":
-#     a = 1
-#     b = 12346
-#     n = 10000
+#     a = -100
+#     b = 100
+#     n = 100
 #
-#     def f(x):
-#         res = math.sin(x)
-#         return res
+#     # def f(x):
+#     #     res = math.sin(x)
+#     #     return res
+#     a_f = np.random.randn(2)
+#     f = np.poly1d(a_f)
 #
 #     interpolator = Assignment1()
 #     path = interpolator.interpolate(f, a, b, n)
-#     points_x = np.linspace(a, b, num=n)
+#     points_x = np.linspace(a, b, num=n-1)
 #     points_y = np.zeros(n)
 #     points_y_real = np.zeros(n)
-#     for i in range(0, n-1):
+#     for i in range(0, n):
 #         points_y[i] = path(points_x[i])
-#     for i in range(0, n-1):
+#     for i in range(0, n):
 #         points_y_real[i] = f(points_x[i])
 #
 #     # extract x & y coordinates of points
@@ -181,9 +213,9 @@ class Assignment1:
 #     # px, py = path_points[:, 0], path_points[:, 1]
 #
 #     # plot
-#     plt.plot(points_x, points_y)
-#     plt.xlim(left=0, right=100)
-#     # plt.plot(points_x, points_y_real)
+#     plt.plot(points_x, points_y, 'r')
+#     plt.xlim(left=0, right=1000)
+#     plt.plot(points_x, points_y_real, 'b')
 #     plt.show()
 #
 #     # plt.figure(figsize=(11, 8))
@@ -191,7 +223,7 @@ class Assignment1:
 #     # plt.show()
 
 
-##########################################################################
+#########################################################################
 
 
 import unittest
@@ -240,6 +272,5 @@ class TestAssignment1(unittest.TestCase):
             yy = ff(x)
 
     # def test_3(self):
-
 if __name__ == "__main__":
     unittest.main()
