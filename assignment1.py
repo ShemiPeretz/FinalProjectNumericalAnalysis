@@ -85,22 +85,22 @@ class Assignment1:
         P[n - 1] = 8 * points[n - 1] + points[n]
 
         # creating arrays for coefficients
-        c = np.ones(n-1)
-        b = np.full(n-1, 4)
+        c = np.ones(n)
+        b = np.full(n+1, 4)
         b[0] = 2
-        b[n-1] = 7
-        a = np.full(n-1, 1)
+        b[n] = 7
+        a = np.ones(n)
         a[n-1] = 2
 
-        A = self.TDMAsolver(a, b, c, P)
+        a_c_points = self.TDMAsolver(a, b, c, P)
         # solve system, find a & b
         # A = np.linalg.solve(C, P)  # TODO: change to thomas algo!
         B = [0] * n
         for i in range(n - 1):
-            B[i] = 2 * points[i + 1] - A[i + 1]
-        B[n - 1] = (A[n - 1] + points[n]) / 2
+            B[i] = 2 * points[i + 1] - a_c_points[i + 1]
+        B[n - 1] = (a_c_points[n - 1] + points[n]) / 2
 
-        return A, B
+        return a_c_points, B
 
     # returns the general Bezier cubic formula given 4 control points
     def get_cubic(self, a, b, c, d):
@@ -114,92 +114,81 @@ class Assignment1:
                 self.get_cubic(points[i], A[i], B[i], points[i + 1]) for i in range(len(points) - 1)
                 }
 
-    def final_poly(self, points): # TODO: n is needed?
+    def final_poly(self, points):
         return self.get_bezier_cubic(points)
 
     def x_location(self, value_of_x, points):
         start_point = 0
         end_point = 0
 
-        for key, val in self.interpolated_dict.items():  # TODO: Check End Point
+        for key, val in self.interpolated_dict.items():
             if start_point == 0:
                 start_point = key
             if value_of_x > key[0]:
                 start_point = key
             else:
                 end_point = key
+                break
 
         normal_x = (value_of_x - start_point[0])/(end_point[0] - start_point[0])
 
         return self.interpolated_dict[start_point](normal_x)[1]
 
-    def TDMAsolver(self, a, b, c, d):
-        nf = len(a)  # number of equations
-        ac, bc, cc, dc = map(np.array, (a, b, c, d))  # copy the array
-        for it in range(1, nf):
-            mc = ac[it] / bc[it - 1]
-            bc[it] = bc[it] - mc * cc[it - 1]
-            dc[it] = dc[it] - mc * dc[it - 1]
+    def TDMAsolver(self, lower, middle, upper, points_vector):
+        equations_num = len(lower)
+        cLower, cMiddle, cUpper, cVector = map(np.array, (lower, middle, upper, points_vector))
+        for i in range(1, equations_num):
+            mc = cLower[i] / cMiddle[i - 1]
+            cMiddle[i] = cMiddle[i] - mc * cUpper[i - 1]
+            cVector[i][0] = cVector[i][0] - mc * cVector[i - 1][0]
+            cVector[i][1] = cVector[i][1] - mc * cVector[i - 1][1]
 
-        xc = ac
-        xc[-1] = dc[-1] / bc[-1]
+        xc = np.empty([equations_num, 2])
+        for i in range(0, len(cLower)):
+            xc[i][0] = cLower[i]
+        xc[-1] = cVector[-1] / cMiddle[-1]
+        # xc[-1][1] = cVector[-1][1] / cMiddle[-1]
 
-        for il in range(nf - 2, -1, -1):
-            xc[il] = (dc[il] - cc[il] * xc[il + 1]) / bc[il]
+        for j in range(equations_num - 2, -1, -1):
+            xc[j][0] = (cVector[j][0] - cUpper[j] * xc[j + 1][0]) / cMiddle[j]
+            xc[j][1] = (cVector[j][1] - cUpper[j] * xc[j + 1][0]) / cMiddle[j]
 
-        del bc, cc, dc  # delete variables from memory
+        del cMiddle, cUpper, cVector  # delete variables from memory
         return xc
 
-
+# Ploting For Testing use TODO: remove before flight
 # if __name__ == "__main__":
 #     a = 1
 #     b = 12346
-#     n = 100
+#     n = 10000
 #
 #     def f(x):
-#         res = math.cos(x)
+#         res = math.sin(x)
 #         return res
 #
-#     # points_x_values = np.linspace(a, b, num=n + 1)
-#     # points_values = np.zeros([n+1, 2])
-#     # for i in range(0, n+1):
-#     #     _x = points_x_values.item(i)
-#     #     points_values[i] = [_x, f(_x)]
-#     #
 #     interpolator = Assignment1()
 #     path = interpolator.interpolate(f, a, b, n)
+#     points_x = np.linspace(a, b, num=n)
+#     points_y = np.zeros(n)
+#     points_y_real = np.zeros(n)
+#     for i in range(0, n-1):
+#         points_y[i] = path(points_x[i])
+#     for i in range(0, n-1):
+#         points_y_real[i] = f(points_x[i])
 #
 #     # extract x & y coordinates of points
 #     # x, y = points_values[:, 0], points_values[:, 1]
-#     px, py = path[:, 0], path[:, 1]
+#     # px, py = path_points[:, 0], path_points[:, 1]
 #
 #     # plot
-#     plt.plot(path[:, 0], path[:, 1])
+#     plt.plot(points_x, points_y)
+#     plt.xlim(left=0, right=100)
+#     # plt.plot(points_x, points_y_real)
 #     plt.show()
-#     plt.figure(figsize=(11, 8))
-#     plt.plot(px, py, 'b-')
-#     # plt.plot(x, y, 'ro')
-#     plt.show()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#
+#     # plt.figure(figsize=(11, 8))
+#     # plt.plot(px, py, 'b-')
+#     # plt.show()
 
 
 ##########################################################################
@@ -249,6 +238,8 @@ class TestAssignment1(unittest.TestCase):
         xs = np.random.random(20)
         for x in xs:
             yy = ff(x)
+
+    # def test_3(self):
 
 if __name__ == "__main__":
     unittest.main()
