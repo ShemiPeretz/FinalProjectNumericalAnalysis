@@ -126,55 +126,39 @@ class Assignment1:
         return self.interpolated_dict[start_point](normal_x)[1]
 
 
+# Ploting For Testing use TODO: remove before flight
 # if __name__ == "__main__":
 #     a = 1
 #     b = 12346
-#     n = 100
+#     n = 10000
 #
 #     def f(x):
-#         res = math.cos(x)
+#         res = math.sin(x)
 #         return res
 #
-#     # points_x_values = np.linspace(a, b, num=n + 1)
-#     # points_values = np.zeros([n+1, 2])
-#     # for i in range(0, n+1):
-#     #     _x = points_x_values.item(i)
-#     #     points_values[i] = [_x, f(_x)]
-#     #
 #     interpolator = Assignment1()
 #     path = interpolator.interpolate(f, a, b, n)
+#     points_x = np.linspace(a, b, num=n)
+#     points_y = np.zeros(n)
+#     points_y_real = np.zeros(n)
+#     for i in range(0, n-1):
+#         points_y[i] = path(points_x[i])
+#     for i in range(0, n-1):
+#         points_y_real[i] = f(points_x[i])
 #
 #     # extract x & y coordinates of points
 #     # x, y = points_values[:, 0], points_values[:, 1]
-#     px, py = path[:, 0], path[:, 1]
+#     # px, py = path_points[:, 0], path_points[:, 1]
 #
 #     # plot
-#     plt.plot(path[:, 0], path[:, 1])
+#     plt.plot(points_x, points_y)
+#     plt.xlim(left=0, right=100)
+#     # plt.plot(points_x, points_y_real)
 #     plt.show()
-#     plt.figure(figsize=(11, 8))
-#     plt.plot(px, py, 'b-')
-#     # plt.plot(x, y, 'ro')
-#     plt.show()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#
+#     # plt.figure(figsize=(11, 8))
+#     # plt.plot(px, py, 'b-')
+#     # plt.show()
 
 
 ##########################################################################
@@ -224,6 +208,8 @@ class TestAssignment1(unittest.TestCase):
         xs = np.random.random(20)
         for x in xs:
             yy = ff(x)
+
+    # def test_3(self):
 
 if __name__ == "__main__":
     unittest.main()
