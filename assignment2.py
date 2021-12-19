@@ -5,6 +5,7 @@ In this assignment you should find the intersection points for two functions.
 import numpy as np
 import time
 import random
+import matplotlib
 from collections.abc import Iterable
 
 
@@ -15,7 +16,7 @@ class Assignment2:
         solving the assignment for specific functions. 
         """
 
-        pass
+        self.intersections = np.empty
 
     def intersections(self, f1: callable, f2: callable, a: float, b: float, maxerr=0.001) -> Iterable:
         """
@@ -51,7 +52,49 @@ class Assignment2:
 
         # replace this line with your solution
         X=[0]
-        return X
+
+        return normal_function(f1, f2) 
+
+    def intersect_function(self, f1:callable, f2:callable):
+        return lambda x: f1(x) - f2(x)
+
+    def chebyshev_mathod(self):
+        pass
+
+##########################################################################
+# Ploting For Testing use TODO: remove before flight
+if __name__ == "__main__":
+    a = 1
+    b = 12346
+    n = 1000
+
+    def f(x):
+        res = math.sin(x)
+        return res
+
+    intersactor = Assignments2()
+    path = intersector.intersections(f1, f2, a, b)
+    points_x = np.linspace(a, b, num=n)
+    points_y = np.zeros(n)
+    points_y_real = np.zeros(n)
+    for i in range(0, n-1):
+        points_y[i] = path(points_x[i])
+    for i in range(0, n-1):
+        points_y_real[i] = f(points_x[i])
+
+    # extract x & y coordinates of points
+    # x, y = points_values[:, 0], points_values[:, 1]
+    # px, py = path_points[:, 0], path_points[:, 1]
+
+    # plot
+    plt.plot(points_x, points_y)
+    plt.xlim(left=0, right=100)
+    # plt.plot(points_x, points_y_real)
+    plt.show()
+
+    # plt.figure(figsize=(11, 8))
+    # plt.plot(px, py, 'b-')
+    # plt.show()
 
 
 ##########################################################################
