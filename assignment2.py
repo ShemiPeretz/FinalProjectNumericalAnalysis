@@ -6,6 +6,7 @@ import numpy as np
 import time
 import random
 import matplotlib
+import sympy  # TODO: REMOVE!!!!!!!!
 from collections.abc import Iterable
 
 
@@ -16,7 +17,6 @@ class Assignment2:
         solving the assignment for specific functions. 
         """
 
-        self.intersections = np.empty
 
     def intersections(self, f1: callable, f2: callable, a: float, b: float, maxerr=0.001) -> Iterable:
         """
@@ -51,50 +51,64 @@ class Assignment2:
         """
 
         # replace this line with your solution
-        X=[0]
 
-        return normal_function(f1, f2) 
+        diffrence_func = self.intersect_function(f1, f2)
+        self.newton_raphson(20, diffrence_func, 0.001)
+
+        X=[0]
+        return X
 
     def intersect_function(self, f1:callable, f2:callable):
         return lambda x: f1(x) - f2(x)
 
-    def chebyshev_mathod(self):
-        pass
+    def newton_raphson(self, guess, function, maxerr):
+        h = 0.00000000001
+        x = guess
+        deriv = (function(x + h) / h) - (function(x) / h)
+        epsilon = function(x) / deriv
+        while abs(epsilon) >= maxerr:
+            epsilon = function(x) / deriv
+            # x(i+1) = x(i) - f(x) / f'(x)
+            x = x - epsilon
+            deriv = (function(x + h) / h) - (function(x) / h)
+
+        print("The value of the root is : ", "%.4f" % x)
+
 
 ##########################################################################
-# Ploting For Testing use TODO: remove before flight
-if __name__ == "__main__":
-    a = 1
-    b = 12346
-    n = 1000
-
-    def f(x):
-        res = math.sin(x)
-        return res
-
-    intersactor = Assignments2()
-    path = intersector.intersections(f1, f2, a, b)
-    points_x = np.linspace(a, b, num=n)
-    points_y = np.zeros(n)
-    points_y_real = np.zeros(n)
-    for i in range(0, n-1):
-        points_y[i] = path(points_x[i])
-    for i in range(0, n-1):
-        points_y_real[i] = f(points_x[i])
-
-    # extract x & y coordinates of points
-    # x, y = points_values[:, 0], points_values[:, 1]
-    # px, py = path_points[:, 0], path_points[:, 1]
-
-    # plot
-    plt.plot(points_x, points_y)
-    plt.xlim(left=0, right=100)
-    # plt.plot(points_x, points_y_real)
-    plt.show()
-
-    # plt.figure(figsize=(11, 8))
-    # plt.plot(px, py, 'b-')
-    # plt.show()
+# # Ploting For Testing use TODO: remove before flight
+# if __name__ == "__main__":
+#     a = 1
+#     b = 12346
+#     n = 1000
+#
+#     def f(x):
+#         res = math.sin(x)
+#         return res
+#
+#     intersactor = Assignments2()
+#     path = intersector.intersections(f1, f2, a, b)
+#     points_x = np.linspace(a, b, num=n)
+#     points_y = np.zeros(n)
+#     points_y_real = np.zeros(n)
+#     for i in range(0, n-1):
+#         points_y[i] = path(points_x[i])
+#     for i in range(0, n-1):
+#         points_y_real[i] = f(points_x[i])
+#
+#     # extract x & y coordinates of points
+#     # x, y = points_values[:, 0], points_values[:, 1]
+#     # px, py = path_points[:, 0], path_points[:, 1]
+#
+#     # plot
+#     plt.plot(points_x, points_y)
+#     plt.xlim(left=0, right=100)
+#     # plt.plot(points_x, points_y_real)
+#     plt.show()
+#
+#     # plt.figure(figsize=(11, 8))
+#     # plt.plot(px, py, 'b-')
+#     # plt.show()
 
 
 ##########################################################################
@@ -130,6 +144,15 @@ class TestAssignment2(unittest.TestCase):
         for x in X:
             self.assertGreaterEqual(0.001, abs(f1(x) - f2(x)))
 
+    def test_3(self):
+        f1 = lambda x: x**2
+        f2 = lambda x: 2*x
+
+        a = -10.0
+        b = 10.0
+
+        intersector = Assignment2()
+        intersector.intersections(f1, f2, a, b)
 
 if __name__ == "__main__":
     unittest.main()
