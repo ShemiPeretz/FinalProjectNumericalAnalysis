@@ -6,7 +6,6 @@ import numpy as np
 import time
 import random
 import matplotlib
-import sympy  # TODO: REMOVE!!!!!!!!
 from collections.abc import Iterable
 
 
@@ -16,6 +15,7 @@ class Assignment2:
         Here goes any one time calculation that need to be made before 
         solving the assignment for specific functions. 
         """
+        intersections_list = np.ndarray([10])
 
 
     def intersections(self, f1: callable, f2: callable, a: float, b: float, maxerr=0.001) -> Iterable:
@@ -53,7 +53,7 @@ class Assignment2:
         # replace this line with your solution
 
         diffrence_func = self.intersect_function(f1, f2)
-        self.newton_raphson(20, diffrence_func, 0.001)
+        self.newton_raphson(a, b, diffrence_func, 0.001)
 
         X=[0]
         return X
@@ -61,18 +61,25 @@ class Assignment2:
     def intersect_function(self, f1:callable, f2:callable):
         return lambda x: f1(x) - f2(x)
 
-    def newton_raphson(self, guess, function, maxerr):
-        h = 0.00000000001
-        x = guess
-        deriv = (function(x + h) / h) - (function(x) / h)
-        epsilon = function(x) / deriv
-        while abs(epsilon) >= maxerr:
-            epsilon = function(x) / deriv
-            # x(i+1) = x(i) - f(x) / f'(x)
-            x = x - epsilon
-            deriv = (function(x + h) / h) - (function(x) / h)
 
-        print("The value of the root is : ", "%.4f" % x)
+    def newton_raphson(self, left_bracket, right_bracket, function, maxerr):
+        h = 0.00000000001
+        x = left_bracket
+        while x <= right_bracket:
+            deriv = (function(x + h) / h) - (function(x) / h)
+            epsilon = function(x) / deriv
+            lst = []
+            while abs(epsilon) >= maxerr:
+                epsilon = function(x) / deriv
+                # x(i+1) = x(i) - f(x) / f'(x)
+                x = x - epsilon
+                deriv = (function(x + h) / h) - (function(x) / h)
+
+            print("The value of the root is : ", "%.4f" % x)
+            # self.intersections_list.insert(x)
+            lst.append(x)
+            print(lst)
+            x += maxerr
 
 
 ##########################################################################
@@ -148,8 +155,8 @@ class TestAssignment2(unittest.TestCase):
         f1 = lambda x: x**2
         f2 = lambda x: 2*x
 
-        a = -10.0
-        b = 10.0
+        a = 0
+        b = 2
 
         intersector = Assignment2()
         intersector.intersections(f1, f2, a, b)
