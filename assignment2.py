@@ -55,8 +55,11 @@ class Assignment2:
         # replace this line with your solution
 
         diffrence_func = self.intersect_function(f1, f2)
-        split = np.array_split(range(a, b), abs(b - a)) # TODO: Change the spliting
-        right_bracket = b
+        split_factor = self.split_for_roots(a, b, diffrence_func, maxerr)
+        if split_factor == 1:
+            split = np.array_split(range(a, b), abs(b - a)) # TODO: Change the spliting
+        else
+            split = np.array_split(range(a, b), abs(b - a)*(1/maxerr))
 
         for i in range(len(split)):
             a = split[i][0]
@@ -79,6 +82,19 @@ class Assignment2:
 
     def intersect_function(self, f1:callable, f2:callable):
         return lambda x: f1(x) - f2(x)
+
+    def split_for_roots(self, left_bracket, right_bracket, function, maxerr):
+        h = 0.00000000001
+        deriv_sum = 0
+        checkpoints = np.random.uniform(left_bracket, right_bracket, 10)
+        for i in range(0,10):
+            deriv_avg += ((function(x + h) / h) - (function(x) / h)
+        deriv_avg = deriv_sum/10
+        if deriv_avg > 2:
+            return 0.001
+        else
+            return 1
+
 
     def bisection_guesser(self, left_bracket, right_bracket, function, maxerr):
         # TODO: What if a and b arent legal? make it work!
