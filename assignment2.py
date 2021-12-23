@@ -17,8 +17,6 @@ class Assignment2:
         solving the assignment for specific functions. 
         """
         self.intersections_list = []
-        self.max_x = None
-        self.flag = True
 
     def intersections(self, f1: callable, f2: callable, a: float, b: float, maxerr=0.001) -> Iterable:
         """
@@ -55,46 +53,34 @@ class Assignment2:
         # replace this line with your solution
 
         diffrence_func = self.intersect_function(f1, f2)
-        split_factor = self.split_for_roots(a, b, diffrence_func, maxerr)
-        if split_factor == 1:
-            split = np.array_split(range(a, b), abs(b - a)) # TODO: Change the spliting
-        else
-            split = np.array_split(range(a, b), abs(b - a)*(1/maxerr))
+        guesses = np.linspace(a, b, 5000)
+        #guesses = self.filter_points(points, diffrence_func, maxerr)
 
-        for i in range(len(split)):
-            a = split[i][0]
-            if i == len(split)-1:
-                b = right_bracket
-            else:
-                b = split[i+1][0]
-            if (diffrence_func(a) * diffrence_func(b)) >= 0:
-                guess = self.secant_guesser(a, b, diffrence_func, maxerr)
-            else:
-                guess = self.bisection_guesser(a, b, diffrence_func, maxerr)
-            if guess is None:
-                continue
-            if guess in self.intersections_list:
-                continue
-            self.newton_raphson(guess, a, b, diffrence_func, maxerr)
+        for i in range(0, len(guesses)-1):
+            if guesses[i] is not None:
+                b_guess = self.bisection_guesser(guesses[i], guesses[i+1], diffrence_func, maxerr)
+            if b_guess is not None:
+                self.newton_raphson(b_guess, a, b, diffrence_func, maxerr)
 
-        print(self.intersections_list)
+        # for i in range(0, len(guesses)):
+        #     if guesses[i] is not None:
+        #         self.newton_raphson(guesses[i], a, b, diffrence_func, maxerr)
+
+        # print(self.intersections_list)
+        # print(len(self.intersections_list))
         return self.intersections_list
 
     def intersect_function(self, f1:callable, f2:callable):
         return lambda x: f1(x) - f2(x)
 
-    def split_for_roots(self, left_bracket, right_bracket, function, maxerr):
+    def filter_points(self, points, function, maxerr):
+        filtered = []
         h = 0.00000000001
-        deriv_sum = 0
-        checkpoints = np.random.uniform(left_bracket, right_bracket, 10)
-        for i in range(0,10):
-            deriv_avg += ((function(x + h) / h) - (function(x) / h)
-        deriv_avg = deriv_sum/10
-        if deriv_avg > 2:
-            return 0.001
-        else
-            return 1
-
+        deriv = lambda x: ((function(x + h) / h) - (function(x) / h))
+        for i in range(len(points)-1):
+            if not (points[i + 1] - points[i] < maxerr):
+                filtered.append(points[i])
+        return filtered
 
     def bisection_guesser(self, left_bracket, right_bracket, function, maxerr):
         # TODO: What if a and b arent legal? make it work!
@@ -125,8 +111,6 @@ class Assignment2:
             else:
                 left_bracket = c
 
-        if c > self.max_x:
-            self.max_x = c
         return c
 
     def secant_guesser(self, x1, x2, function, maxerr):
@@ -170,9 +154,9 @@ class Assignment2:
             # TODO: What do you do in that situation
             return
 
-    def newton_raphson(self, guess,left_bracket, right_bracket, function, maxerr):
+    def newton_raphson(self, guess, left_bracket, right_bracket, function, maxerr):
         self.flag = False
-        h = 0.00000000001
+        h = 0.00000000000001
         x = guess
         deriv = (function(x + h) / h) - (function(x) / h)
         epsilon = function(x) / deriv
@@ -183,7 +167,10 @@ class Assignment2:
             deriv = (function(x + h) / h) - (function(x) / h)
 
         # print("The value of the root is : ", "%.4f" % x)
-        self.intersections_list.append(x)
+        if x in self.intersections_list:
+            return
+        else:
+            self.intersections_list.append(x)
 
 
 ##########################################################################
@@ -255,22 +242,22 @@ class TestAssignment2(unittest.TestCase):
         for x in X:
             self.assertGreaterEqual(0.001, abs(f1(x) - f2(x)))
 
-    def test_3(self):
-        f3 =lambda x: 1.52*x**10 - 0.6189*x**9 + 1.58*x**8 - 0.01277*x**7 - 0.6578*x**6 + 0.3955*x**5 + 1.223*x**4 + \
-                      1.716*x**3 - 0.4981*x**2 + 0.3833*x - 1.359
-        f4 =lambda x: -0.2656*x**10+0.1583*x**9-0.1591*x**8+0.9435*x**7+1.406*x**6-0.4601*x**5-0.1547*x**4-0.5351*x**3 - \
-                      1.107*x**2+0.102*x +1.763
-        f1 = lambda x: x**2
-        f2 = lambda x: 2*x
-
-        f5 = lambda x: math.sin(10*x)
-        f6 = lambda x: math.cos(10*x)
-
-        a = -1
-        b = 1
-
-        intersector = Assignment2()
-        intersector.intersections(f5, f6, a, b)
+    # def test_3(self):
+    #     f3 =lambda x: 1.52*x**10 - 0.6189*x**9 + 1.58*x**8 - 0.01277*x**7 - 0.6578*x**6 + 0.3955*x**5 + 1.223*x**4 + \
+    #                   1.716*x**3 - 0.4981*x**2 + 0.3833*x - 1.359
+    #     f4 =lambda x: -0.2656*x**10+0.1583*x**9-0.1591*x**8+0.9435*x**7+1.406*x**6-0.4601*x**5-0.1547*x**4-0.5351*x**3 - \
+    #                   1.107*x**2+0.102*x +1.763
+    #     f1 = lambda x: x**2
+    #     f2 = lambda x: 2*x
+    #
+    #     f5 = lambda x: math.sin(10*x)
+    #     f6 = lambda x: math.cos(10*x)
+    #
+    #     a = -10
+    #     b = 10
+    #
+    #     intersector = Assignment2()
+    #     intersector.intersections(f5, f6, a, b)
 
 if __name__ == "__main__":
     unittest.main()
