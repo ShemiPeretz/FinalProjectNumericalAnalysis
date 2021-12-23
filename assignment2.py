@@ -62,12 +62,8 @@ class Assignment2:
             if b_guess is not None:
                 self.newton_raphson(b_guess, a, b, diffrence_func, maxerr)
 
-        # for i in range(0, len(guesses)):
-        #     if guesses[i] is not None:
-        #         self.newton_raphson(guesses[i], a, b, diffrence_func, maxerr)
-
-        # print(self.intersections_list)
-        # print(len(self.intersections_list))
+        print(self.intersections_list)
+        print(len(self.intersections_list))
         return self.intersections_list
 
     def intersect_function(self, f1:callable, f2:callable):
@@ -172,69 +168,8 @@ class Assignment2:
         else:
             self.intersections_list.append(x)
 
-    def newtonRaphson(x0, e, N):
-        step = 1
-        flag = 1
-        condition = True
-        while condition:
-            if g(x0) == 0.0:
-                print('Divide by zero error!')
-                break
-
-            x1 = x0 - f(x0) / g(x0)
-            print('Iteration-%d, x1 = %0.6f and f(x1) = %0.6f' % (step, x1, f(x1)))
-            x0 = x1
-            step = step + 1
-
-            if step > N:
-                flag = 0
-                break
-
-            condition = abs(f(x1)) > e
-
-        if flag == 1:
-            print('\nRequired root is: %0.8f' % x1)
-        else:
-            print('\nNot Convergent.')
-##########################################################################
-# # Ploting For Testing use TODO: remove before flight
-# if __name__ == "__main__":
-#     a = 1
-#     b = 12346
-#     n = 1000
-#
-#     def f(x):
-#         res = math.sin(x)
-#         return res
-#
-#     intersactor = Assignments2()
-#     path = intersector.intersections(f1, f2, a, b)
-#     points_x = np.linspace(a, b, num=n)
-#     points_y = np.zeros(n)
-#     points_y_real = np.zeros(n)
-#     for i in range(0, n-1):
-#         points_y[i] = path(points_x[i])
-#     for i in range(0, n-1):
-#         points_y_real[i] = f(points_x[i])
-#
-#     # extract x & y coordinates of points
-#     # x, y = points_values[:, 0], points_values[:, 1]
-#     # px, py = path_points[:, 0], path_points[:, 1]
-#
-#     # plot
-#     plt.plot(points_x, points_y)
-#     plt.xlim(left=0, right=100)
-#     # plt.plot(points_x, points_y_real)
-#     plt.show()
-#
-#     # plt.figure(figsize=(11, 8))
-#     # plt.plot(px, py, 'b-')
-#     # plt.show()
-
 
 ##########################################################################
-
-
 import unittest
 from sampleFunctions import *
 from tqdm import tqdm
@@ -265,34 +200,37 @@ class TestAssignment2(unittest.TestCase):
         for x in X:
             self.assertGreaterEqual(0.001, abs(f1(x) - f2(x)))
 
-    # def test_3(self):
-    #     f3 =lambda x: 1.52*x**10 - 0.6189*x**9 + 1.58*x**8 - 0.01277*x**7 - 0.6578*x**6 + 0.3955*x**5 + 1.223*x**4 + \
-    #                   1.716*x**3 - 0.4981*x**2 + 0.3833*x - 1.359
-    #     f4 =lambda x: -0.2656*x**10+0.1583*x**9-0.1591*x**8+0.9435*x**7+1.406*x**6-0.4601*x**5-0.1547*x**4-0.5351*x**3 - \
-    #                   1.107*x**2+0.102*x +1.763
-    #     f1 = lambda x: x**2
-    #     f2 = lambda x: 2*x
-    #
-    #     f5 = lambda x: math.sin(10*x)
-    #     f6 = lambda x: math.cos(10*x)
-    #
-    #     a = -10
-    #     b = 10
-    #
-    #     intersector = Assignment2()
-    #     intersector.intersections(f5, f6, a, b)
+    def test_3(self):
+        f3 =lambda x: 1.52*x**10 - 0.6189*x**9 + 1.58*x**8 - 0.01277*x**7 - 0.6578*x**6 + 0.3955*x**5 + 1.223*x**4 + \
+                      1.716*x**3 - 0.4981*x**2 + 0.3833*x - 1.359
+        f4 =lambda x: -0.2656*x**10+0.1583*x**9-0.1591*x**8+0.9435*x**7+1.406*x**6-0.4601*x**5-0.1547*x**4-0.5351*x**3 - \
+                      1.107*x**2+0.102*x +1.763
+        f1 = lambda x: x**2
+        f2 = lambda x: 2*x
+
+        f5 = lambda x: math.sin(100*x)
+        f6 = lambda x: math.cos(100*x)
+        f7 = lambda x: (x*np.log10(x))/12
+        f8 = lambda x: 0
+        f9 = lambda x: 10 * x * np.sin(x)
+
+        a = -10
+        b = 10
+
+        intersector = Assignment2()
+        intersector.intersections(f5, f6, a, b)
 
     def test4_ass2_2(self):
-
-        # TODO sin(x) dont work
 
         def zero(a): return 0
 
         def sin(x): return 10 * x * np.sin(x)
 
-        domain = (-5, 5)
+        f1 = lambda x: (x*math.log10(x))/12
+
+        domain = (0, 5)
         ass = Assignment2()
-        roots = ass.intersections(sin, zero, domain[0], domain[1], maxerr=0.001)
+        roots = ass.intersections(f1, zero, domain[0], domain[1], maxerr=0.001)
 
         for i in roots:
             self.assertLess(abs(sin(i)), 0.001, msg="Err bigger the 0.001")
