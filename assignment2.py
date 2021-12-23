@@ -160,7 +160,7 @@ class Assignment2:
         x = guess
         deriv = (function(x + h) / h) - (function(x) / h)
         epsilon = function(x) / deriv
-        while abs(epsilon) >= maxerr:
+        while abs(function(x)) >= maxerr:
             epsilon = function(x) / deriv
             # x(i+1) = x(i) - f(x) / f'(x)
             x = x - epsilon
@@ -172,7 +172,30 @@ class Assignment2:
         else:
             self.intersections_list.append(x)
 
+    def newtonRaphson(x0, e, N):
+        step = 1
+        flag = 1
+        condition = True
+        while condition:
+            if g(x0) == 0.0:
+                print('Divide by zero error!')
+                break
 
+            x1 = x0 - f(x0) / g(x0)
+            print('Iteration-%d, x1 = %0.6f and f(x1) = %0.6f' % (step, x1, f(x1)))
+            x0 = x1
+            step = step + 1
+
+            if step > N:
+                flag = 0
+                break
+
+            condition = abs(f(x1)) > e
+
+        if flag == 1:
+            print('\nRequired root is: %0.8f' % x1)
+        else:
+            print('\nNot Convergent.')
 ##########################################################################
 # # Ploting For Testing use TODO: remove before flight
 # if __name__ == "__main__":
@@ -258,6 +281,21 @@ class TestAssignment2(unittest.TestCase):
     #
     #     intersector = Assignment2()
     #     intersector.intersections(f5, f6, a, b)
+
+    def test4_ass2_2(self):
+
+        # TODO sin(x) dont work
+
+        def zero(a): return 0
+
+        def sin(x): return 10 * x * np.sin(x)
+
+        domain = (-5, 5)
+        ass = Assignment2()
+        roots = ass.intersections(sin, zero, domain[0], domain[1], maxerr=0.001)
+
+        for i in roots:
+            self.assertLess(abs(sin(i)), 0.001, msg="Err bigger the 0.001")
 
 if __name__ == "__main__":
     unittest.main()
