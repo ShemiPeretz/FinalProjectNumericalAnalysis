@@ -59,8 +59,8 @@ class Assignment3:
         """
 
         # replace this line with your solution
-        result = np.float32(1.0)
-
+        integral = self.simpsons_rule(f, a, b, n)
+        result = np.float32(integral)
         return result
 
     def areabetween(self, f1: callable, f2: callable) -> np.float32:
@@ -95,6 +95,35 @@ class Assignment3:
 
         return result
 
+    def simpsons_rule(self, function, left_bracket, right_bracket, n):
+
+        # Calculating the value of h
+        h = (right_bracket - left_bracket) / n
+
+        # List for storing value of x and f(x)
+        x_values = list()
+        function_values = list()
+
+        # Calculating values of x and f(x)
+        i = 0
+        while i <= n:
+            x_values.append(left_bracket + i * h)
+            function_values.append(function(x_values[i]))
+            i += 1
+
+        # Calculating result
+        result = 0
+        i = 0
+        while i <= n:
+            if i == 0 or i == n:
+                result += function_values[i]
+            elif i % 2 != 0:
+                result += 4 * function_values[i]
+            else:
+                result += 2 * function_values[i]
+            i += 1
+        result = result * (h / 3)
+        return result
 
 ##########################################################################
 
@@ -116,9 +145,16 @@ class TestAssignment3(unittest.TestCase):
     def test_integrate_hard_case(self):
         ass3 = Assignment3()
         f1 = strong_oscilations()
-        r = ass3.integrate(f1, 0.09, 10, 20)
+        r = ass3.integrate(f1, 0.09, 10, 28750)
         true_result = -7.78662 * 10 ** 33
         self.assertGreaterEqual(0.001, abs((r - true_result) / true_result))
+
+    def test_3(self):
+        ass3 = Assignment3()
+        f1 = lambda x: x*np.sin(x)
+
+        res = ass3.integrate(f1, 0, np.pi/2, 20)
+        print(res)
 
 
 if __name__ == "__main__":
