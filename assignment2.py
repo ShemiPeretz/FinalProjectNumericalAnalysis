@@ -17,6 +17,7 @@ class Assignment2:
         solving the assignment for specific functions. 
         """
         self.intersections_list = []
+        self.count_intersections = 0
 
     def intersections(self, f1: callable, f2: callable, a: float, b: float, maxerr=0.001) -> Iterable:
         """
@@ -64,6 +65,7 @@ class Assignment2:
 
         print(self.intersections_list)
         print(len(self.intersections_list))
+        self.count_intersections = len(self.intersections_list)
         return self.intersections_list
 
     def intersect_function(self, f1:callable, f2:callable):

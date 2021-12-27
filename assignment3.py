@@ -19,6 +19,7 @@ This assignment is more complicated than Assignment1 and Assignment2 because:
 import numpy as np
 import time
 import random
+import assignment2
 
 
 class Assignment3:
@@ -27,8 +28,7 @@ class Assignment3:
         Here goes any one time calculation that need to be made before 
         solving the assignment for specific functions. 
         """
-
-        pass
+        self.intersector = assignment2.Assignment2()
 
     def integrate(self, f: callable, a: float, b: float, n: int) -> np.float32:
         """
@@ -91,8 +91,19 @@ class Assignment3:
         """
 
         # replace this line with your solution
-        result = np.float32(1.0)
+        intersaction_function = self.intersect_function(f1, f2)
+        abs_intersaction_function = self.abs_intersect_function(f1, f2)
+        intersections = self.find_intersections(f1, f2)
+        intersections_no = self.count_iterable(intersections)
 
+        area = 0
+
+        area += self.integrate(abs_intersaction_function, 1, intersections[0], 100)
+        for i in range(0, intersections_no-1):
+            area += self.integrate(abs_intersaction_function, intersections[i], intersections[i+1], 100)
+        area += self.integrate(abs_intersaction_function, intersections[intersections_no-1], 100, 100)
+
+        result = np.float32(area)
         return result
 
     def simpsons_rule(self, function, left_bracket, right_bracket, n):
@@ -125,6 +136,20 @@ class Assignment3:
         result = result * (h / 3)
         return result
 
+    def intersect_function(self, f1: callable, f2: callable):
+        return lambda x: f1(x) - f2(x)
+
+    def abs_intersect_function(self, f1: callable, f2: callable):
+        return lambda x: abs(f1(x) - f2(x))
+
+    def find_intersections(self, f1: callable, f2: callable):
+        intersections = self.intersector.intersections(f1, f2, 1, 100)
+        return intersections
+
+    def count_iterable(self, iterable):
+        return sum(1 for e in iterable)
+
+
 ##########################################################################
 
 
@@ -145,7 +170,7 @@ class TestAssignment3(unittest.TestCase):
     def test_integrate_hard_case(self):
         ass3 = Assignment3()
         f1 = strong_oscilations()
-        r = ass3.integrate(f1, 0.09, 10, 28750)
+        r = ass3.integrate(f1, 0.09, 10, 20)
         true_result = -7.78662 * 10 ** 33
         self.assertGreaterEqual(0.001, abs((r - true_result) / true_result))
 
@@ -155,6 +180,15 @@ class TestAssignment3(unittest.TestCase):
 
         res = ass3.integrate(f1, 0, np.pi/2, 20)
         print(res)
+
+    def test_4(self):
+        ass3 = Assignment3()
+        f1 = lambda x: np.sin(x)
+        f2 = lambda x: np.cos(x)
+
+        print(ass3.areabetween(f1, f2))
+
+
 
 
 if __name__ == "__main__":
