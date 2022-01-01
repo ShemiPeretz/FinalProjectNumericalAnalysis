@@ -188,6 +188,14 @@ class TestAssignment3(unittest.TestCase):
 
         print(ass3.areabetween(f1, f2))
 
+    def test_5_stack(self):
+        ass3 = Assignment3()
+        f1 = lambda x: (x**(np.e-1))*np.e**(-x)
+        f2 = lambda x: np.cos(x)
+
+        res = ass3.integrate(f1, 2, 5, 4)
+        print(res)
+
 
 
 

@@ -55,11 +55,44 @@ class Assignment4A:
         """
 
         # replace these lines with your solution
+
+        n = 1000
+
+        x_values = np.linspace(a, b, n)
+        y_values = np.zeros(n)
+        for i in range(n):
+            y_values[i] = f(x_values[i])
+
+        x_sum = x_values.sum()
+        y_sum = y_values.sum()
+
+        self.least_squares(x_values, y_values, x_sum, y_sum, d, n)
+
+
+
+
+
+
         result = lambda x: x
         y = f(1)
 
         return result
 
+    def least_squares(self, x_values, y_values,xSum, ySum, d, n):
+        sum_list = [xSum, ySum]
+        xy = np.empty(n)
+        for i in range(n):
+            xy[i] = (x_values[i] * y_values[i])
+        sum_xy = xy.sum()
+        # coef = np.zeros(d)
+        # for i in range(1, d):
+        #
+        A = np.ndarray([sum_list[1], sum_list[0]], [sum_list[1], n])
+        B = np.ndarray[sum_xy, ySum]
+
+        coef = np.dot(np.dot(np.linalg.inv(np.dot(A.T, A)), A.T), B)
+
+        print(coef)
 
 ##########################################################################
 
@@ -102,7 +135,16 @@ class TestAssignment4(unittest.TestCase):
         mse = mse/1000
         print(mse)
 
-        
+
+    def test_4(self):
+        ass4 = Assignment4A()
+        f = poly(2, 0)
+        nf = NOISY(1)(f)
+        print(f)
+        print(nf(5))
+
+        ass4.fit(nf, 0, 10, 1, maxtime=10)
+
         
 
 
