@@ -56,7 +56,7 @@ class Assignment4A:
 
         # replace these lines with your solution
 
-        n = 1000
+        n = 10000
 
         x_values = np.linspace(a, b, n)
         y_values = np.zeros(n)
@@ -66,7 +66,7 @@ class Assignment4A:
         x_sum = x_values.sum()
         y_sum = y_values.sum()
 
-        self.least_squares(x_values, y_values, x_sum, y_sum, d, n)
+        self.least_squares(x_values, y_values, x_sum, y_sum, d, n+0.0)
 
 
 
@@ -79,18 +79,29 @@ class Assignment4A:
         return result
 
     def least_squares(self, x_values, y_values,xSum, ySum, d, n):
-        sum_list = [xSum, ySum]
-        xy = np.empty(n)
-        for i in range(n):
-            xy[i] = (x_values[i] * y_values[i])
-        sum_xy = xy.sum()
+
+        sum_xy = 0
+        sum_x_sqr = 0
+        for i in range(int(n)):
+            sum_x_sqr += x_values[i] ** 2
+        for i in range(int(n)):
+            sum_xy += (x_values[i] * y_values[i])
         # coef = np.zeros(d)
         # for i in range(1, d):
         #
-        A = np.ndarray([sum_list[1], sum_list[0]], [sum_list[1], n])
-        B = np.ndarray[sum_xy, ySum]
 
-        coef = np.dot(np.dot(np.linalg.inv(np.dot(A.T, A)), A.T), B)
+        A = np.array([[sum_x_sqr, xSum], [xSum, n]])
+        B = np.array([sum_xy, ySum])
+
+        AT = A.T
+        ATA = np.dot(A.T, A)
+        ATA_inv = np.linalg.inv(ATA)
+        ATA_invAT = np.dot(ATA_inv, AT)
+
+        coef = np.dot(ATA_invAT, B)
+
+
+        # coef = np.dot(np.dot(np.linalg.inv(np.dot(A.T, A)), A.T), B)
 
         print(coef)
 
