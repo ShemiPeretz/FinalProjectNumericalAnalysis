@@ -56,17 +56,23 @@ class Assignment4A:
 
         # replace these lines with your solution
 
-        n = 10000
+        n = 1000
 
         x_values = np.linspace(a, b, n)
-        y_values = np.zeros(n)
+        y_noisy = np.empty(shape=[n, 100])
         for i in range(n):
-            y_values[i] = f(x_values[i])
+            for j in range(100):
+                y_noisy[i][j] = f(x_values[i])
+        y_values = np.empty(n)
+        for i in range(n):
+            y_values[i] = y_noisy[i].mean()
 
-        x_sum = x_values.sum()
-        y_sum = y_values.sum()
+        # x_sum = x_values.sum()
+        # y_sum = y_values.sum()
+        #
+        # self.least_squares(x_values, y_values, x_sum, y_sum, d, n+0.0)
 
-        self.least_squares(x_values, y_values, x_sum, y_sum, d, n+0.0)
+        self.alt_least_squars(x_values, y_values, d, n)
 
 
 
@@ -104,6 +110,23 @@ class Assignment4A:
         # coef = np.dot(np.dot(np.linalg.inv(np.dot(A.T, A)), A.T), B)
 
         print(coef)
+
+    def alt_least_squars(self ,x_values, y_values, d, n):
+        B = y_values
+        x = np.zeros(d)  # TODO: Needed?
+        A = np.empty(shape=[n, d+1])
+        for i in range(n):
+            for j in range(d+1):
+                A[i][j] = np.power(x_values[i], j)
+
+        AT = A.T
+        ATA = np.dot(A.T, A)
+        ATA_inv = np.linalg.inv(ATA)
+        ATA_invAT = np.dot(ATA_inv, AT)
+
+        coef = np.dot(ATA_invAT, B)
+        print(coef)
+
 
 ##########################################################################
 
