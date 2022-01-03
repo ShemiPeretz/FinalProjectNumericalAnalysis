@@ -29,7 +29,7 @@ class Assignment4A:
         solving the assignment for specific functions. 
         """
 
-        pass
+        self.coef = []
 
     def fit(self, f: callable, a: float, b: float, d:int, maxtime: float) -> callable:
         """
@@ -56,64 +56,50 @@ class Assignment4A:
 
         # replace these lines with your solution
 
-        n = 1000
+        start_time = time.time()
+
+        if d <= 3:
+            n = 5000
+            mean_n = 50
+        else:
+            n = 1000
+            mean_n = 10
 
         x_values = np.linspace(a, b, n)
-        y_noisy = np.empty(shape=[n, 100])
+        y_values = []
+        y_mean = np.empty(n)
+        samples = 0
+
+        while (time.time() - start_time) < maxtime/2:
+            if samples == 0:
+                for i in range(n):
+                    y = f(x_values[i])
+                    y_values.append([y])
+                samples += 1
+            else:
+                for i in range(n):
+                    y = f(x_values[i])
+                    y_values[i].append(y)
         for i in range(n):
-            for j in range(100):
-                y_noisy[i][j] = f(x_values[i])
-        y_values = np.empty(n)
-        for i in range(n):
-            y_values[i] = y_noisy[i].mean()
+            y_mean[i] = np.mean(y_values[i])
 
-        # x_sum = x_values.sum()
-        # y_sum = y_values.sum()
-        #
-        # self.least_squares(x_values, y_values, x_sum, y_sum, d, n+0.0)
+        print(f"{len(y_values[0])} samples of y taken")
 
-        self.alt_least_squars(x_values, y_values, d, n)
+        lesStart = time.time()
+        self.coef = self.least_squars(x_values, y_mean, d, n)
+        lesEnd = time.time()
+        print(f"Time LES took:{lesEnd - lesStart}")
 
+        def res_func(x):
+            res = 0
+            for j in range(len(self.coef)):
+                res += np.power(x, j)*self.coef[j]
+            return res
 
+        return res_func
 
-
-
-
-        result = lambda x: x
-        y = f(1)
-
-        return result
-
-    def least_squares(self, x_values, y_values,xSum, ySum, d, n):
-
-        sum_xy = 0
-        sum_x_sqr = 0
-        for i in range(int(n)):
-            sum_x_sqr += x_values[i] ** 2
-        for i in range(int(n)):
-            sum_xy += (x_values[i] * y_values[i])
-        # coef = np.zeros(d)
-        # for i in range(1, d):
-        #
-
-        A = np.array([[sum_x_sqr, xSum], [xSum, n]])
-        B = np.array([sum_xy, ySum])
-
-        AT = A.T
-        ATA = np.dot(A.T, A)
-        ATA_inv = np.linalg.inv(ATA)
-        ATA_invAT = np.dot(ATA_inv, AT)
-
-        coef = np.dot(ATA_invAT, B)
-
-
-        # coef = np.dot(np.dot(np.linalg.inv(np.dot(A.T, A)), A.T), B)
-
-        print(coef)
-
-    def alt_least_squars(self ,x_values, y_values, d, n):
+    def least_squars(self, x_values, y_values, d, n):  # TODO: check high degree functions
         B = y_values
-        x = np.zeros(d)  # TODO: Needed?
         A = np.empty(shape=[n, d+1])
         for i in range(n):
             for j in range(d+1):
@@ -125,7 +111,8 @@ class Assignment4A:
         ATA_invAT = np.dot(ATA_inv, AT)
 
         coef = np.dot(ATA_invAT, B)
-        print(coef)
+        print(f"list of coefficients {coef}")
+        return coef
 
 
 ##########################################################################
@@ -170,14 +157,15 @@ class TestAssignment4(unittest.TestCase):
         print(mse)
 
 
-    def test_4(self):
-        ass4 = Assignment4A()
-        f = poly(2, 0)
-        nf = NOISY(1)(f)
-        print(f)
-        print(nf(5))
-
-        ass4.fit(nf, 0, 10, 1, maxtime=10)
+    # def test_4(self):
+    #     ass4 = Assignment4A()
+    #     f = poly(2, 0)
+    #     nf = NOISY(1)(f)
+    #     print(f"Real Function: {f}")
+    #
+    #     g = ass4.fit(nf, 0, 10, 1, maxtime=10)
+    #
+    #     print(g(2))
 
         
 
