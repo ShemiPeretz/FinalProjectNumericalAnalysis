@@ -18,8 +18,10 @@ for solving this assignment.
 """
 
 import numpy as np
+import torch
 import time
 import random
+import concurrent.futures
 
 
 class Assignment4A:
@@ -55,7 +57,6 @@ class Assignment4A:
         """
 
         # replace these lines with your solution
-
         start_time = time.time()
 
         if d <= 3:
@@ -98,19 +99,18 @@ class Assignment4A:
 
         return res_func
 
-    def least_squars(self, x_values, y_values, d, n):  # TODO: check high degree functions
+    def least_squars(self, x_values, y_values, d, n):
         B = y_values
         A = np.empty(shape=[n, d+1])
         for i in range(n):
             for j in range(d+1):
                 A[i][j] = np.power(x_values[i], j)
-
         AT = A.T
         ATA = np.dot(A.T, A)
         ATA_inv = np.linalg.inv(ATA)
         ATA_invAT = np.dot(ATA_inv, AT)
-
         coef = np.dot(ATA_invAT, B)
+
         print(f"list of coefficients {coef}")
         return coef
 
@@ -157,15 +157,35 @@ class TestAssignment4(unittest.TestCase):
         print(mse)
 
 
-    # def test_4(self):
-    #     ass4 = Assignment4A()
-    #     f = poly(2, 0)
-    #     nf = NOISY(1)(f)
-    #     print(f"Real Function: {f}")
-    #
-    #     g = ass4.fit(nf, 0, 10, 1, maxtime=10)
-    #
-    #     print(g(2))
+    def test_4(self):
+        print(f"Entered test: {time.time()}")
+        ass4 = Assignment4A()
+        f = poly(2, 3, 4, 5, 5, 6, 3, 7, 7)
+        nf = NOISY(1)(f)
+        print(f"Real Function: {f}")
+
+        g = ass4.fit(nf, 1, 9, 8, maxtime=10)
+
+        mse = 0
+        for x in np.linspace(1, 9, 1000):
+            self.assertNotEqual(f(x), nf(x))
+            mse += (f(x) - g(x)) ** 2
+        mse = mse / 1000
+        print(f"mse is {mse}")
+
+    def test_5(self):
+        f = poly(2, 1, 1, 1, 1, 6, 1, 1, 3, 9, 13, 5, 3)
+        nf = NOISY(1)(f)
+        ass4 = Assignment4A()
+        T = time.time()
+        ff = ass4.fit(f=nf, a=-5, b=5, d=12, maxtime=5)
+        T = time.time() - T
+        mse = 0
+        for x in np.linspace(-5, 5, 1000):
+            self.assertNotEqual(f(x), nf(x))
+            mse += (f(x) - ff(x)) ** 2
+        mse = mse / 1000
+        print(f"mse is {mse}")
 
         
 
