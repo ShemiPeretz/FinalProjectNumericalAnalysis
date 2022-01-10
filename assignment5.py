@@ -23,6 +23,8 @@ import numpy as np
 import time
 import random
 from functionUtils import AbstractShape
+import assignment4
+import matplotlib.pyplot as plt
 
 
 class MyShape(AbstractShape):
@@ -41,7 +43,7 @@ class Assignment5:
 
         pass
 
-    def area(contour: callable, maxerr=0.001)->np.float32:
+    def area(self, contour: callable, maxerr=0.001) -> np.float32:
         """
         Compute the area of the shape with the given contour. 
 
@@ -57,7 +59,11 @@ class Assignment5:
         The area of the shape.
 
         """
-        return np.float32(1.0)
+        n = maxerr*1000000
+        points = contour(n)
+        area = self.shoelace_formula(points, n)
+
+        return np.float32(area)
     
     def fit_shape(self, sample: callable, maxtime: float) -> AbstractShape:
         """
@@ -77,10 +83,74 @@ class Assignment5:
         """
 
         # replace these lines with your solution
+        n = 1000
+        x_values = []
+        y_values = []
+        point = sample()
+
+        x_values.append(point[0])
+        y_values.append(point[1])
+        min_x = point[0]
+        max_x = point[0]
+        min_y = point[1]
+        max_y = point[1]
+
+        for i in range(n-1):
+            point = sample()
+            if point[0] < min_x:
+                min_x = point[0]
+            if point[0] > max_x:
+                max_x = point[0]
+            if point[1] < min_y:
+                min_y = point[1]
+            if point[1] > max_y:
+                max_y = point[1]
+
+            x_values.append(point[0])
+            y_values.append(point[1])
+
+        plt.plot(x_values, y_values, 'ro')
+        plt.plot([-0.5, 0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0], [min_y]*8, "b")
+        plt.plot([-0.5, 0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0], [max_y]*8, "b")
+        plt.plot([max_x]*8, [-0.5, 0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0], "b")
+        plt.plot([min_x]*8, [-0.5, 0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0], "b")
+        plt.show()
+        first = x_values[0]
+
+
+
+
+
+
+
+
+
+
+
+
         result = MyShape()
         x, y = sample()
 
         return result
+
+    def trapezoidal_area(self, x, y1, y2):
+        return ((y1+y2)*x)/2
+
+    def trapeziodal_rule(self, x_values, y_values, n):
+        h = (x_values[n] - x_values[0]) / n
+
+    def shoelace_formula(self, points, n):
+        A = 0
+        for i in range(n-1):
+            A += points[i][0]*points[i+1][1]
+        A += points[n][0]*points[1][1]
+        for i in range(n-1):
+            A -= points[i+1][0]*points[i][1]
+        A -= points[1][0]*points[n][1]
+
+        return abs(A)/2
+
+
 
 
 ##########################################################################
@@ -88,6 +158,7 @@ class Assignment5:
 
 import unittest
 from sampleFunctions import *
+import functionUtils
 from tqdm import tqdm
 
 
@@ -136,6 +207,9 @@ class TestAssignment5(unittest.TestCase):
         self.assertLess(abs(a - np.pi), 0.01)
         self.assertLessEqual(T, 32)
 
+    # def test_5(self):
+    #     ass5 = Assignment5()
+    #     # ass5.area(contour)
 
 if __name__ == "__main__":
     unittest.main()

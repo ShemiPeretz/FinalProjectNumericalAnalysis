@@ -214,13 +214,14 @@ class TestAssignment2(unittest.TestCase):
         f6 = lambda x: math.cos(100*x)
         f7 = lambda x: (x*np.log10(x))/12
         f8 = lambda x: 0
-        f9 = lambda x: 10 * x * np.sin(x)
+        f9 = lambda x: (5*np.cos(19*x + np.e)/2) + (99*np.power(x, 2)/10)
+        f10 = lambda x: (5*np.sin(6*x)) - (np.cos(x/10)*x) + x + 10
 
-        a = -10
-        b = 10
+        a = -20
+        b = 20
 
         intersector = Assignment2()
-        intersector.intersections(f5, f6, a, b)
+        intersector.intersections(f10, f8, a, b, maxerr=0.005)
 
     def test4_ass2_2(self):
 

@@ -87,7 +87,7 @@ class Assignment4A:
         print(f"{len(y_values[0])} samples of y taken")
 
         lesStart = time.time()
-        self.coef = self.least_squars(x_values, y_mean, d, n)
+        self.coef = self.least_squares(x_values, y_mean, d, n)
         lesEnd = time.time()
         print(f"Time LES took:{lesEnd - lesStart}")
 
@@ -99,7 +99,7 @@ class Assignment4A:
 
         return res_func
 
-    def least_squars(self, x_values, y_values, d, n):
+    def least_squares(self, x_values, y_values, d, n):
         B = y_values
         A = np.empty(shape=[n, d+1])
         for i in range(n):
