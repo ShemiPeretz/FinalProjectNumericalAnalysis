@@ -25,14 +25,17 @@ import random
 from functionUtils import AbstractShape
 import assignment4
 import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+from scipy.spatial import ConvexHull
 
 
 class MyShape(AbstractShape):
     # change this class with anything you need to implement the shape
-    def __init__(self):
-        super(MyShape, self).__init__()
-        pass
+    def __init__(self, hull, radius: np.float32, shape_area: np.float32):
+        super(MyShape, self).__init__(hull, radius, shape_area)
 
+    def area(self):
+        return self.shape_area
 
 class Assignment5:
     def __init__(self):
@@ -83,53 +86,32 @@ class Assignment5:
         """
 
         # replace these lines with your solution
-        n = 1000
-        x_values = []
-        y_values = []
-        point = sample()
-
-        x_values.append(point[0])
-        y_values.append(point[1])
-        min_x = point[0]
-        max_x = point[0]
-        min_y = point[1]
-        max_y = point[1]
+        # TODO: add time restriction
+        n = 2000
+        points = []
 
         for i in range(n-1):
-            point = sample()
-            if point[0] < min_x:
-                min_x = point[0]
-            if point[0] > max_x:
-                max_x = point[0]
-            if point[1] < min_y:
-                min_y = point[1]
-            if point[1] > max_y:
-                max_y = point[1]
+            points.append(sample())
+        x_values = [points[i][0] for i in range(0, n-1)]
+        y_values = [points[i][1] for i in range(0, n-1)]
 
-            x_values.append(point[0])
-            y_values.append(point[1])
+        clusters = 20
+        kmeans = KMeans(n_clusters=clusters, init='k-means++', max_iter=500, n_init=10, random_state=0)
+        kmeans.fit(points)
+        # # plt.scatter(kmeans.cluster_centers_[:, 0], kmeans.cluster_centers_[:, 1], s=100, c='red', zorder=5)
+        # # # plt.plot(x_values, y_values, 'bo', zorder=10)
+        # plt.show()
 
-        plt.plot(x_values, y_values, 'ro')
-        plt.plot([-0.5, 0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0], [min_y]*8, "b")
-        plt.plot([-0.5, 0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0], [max_y]*8, "b")
-        plt.plot([max_x]*8, [-0.5, 0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0], "b")
-        plt.plot([min_x]*8, [-0.5, 0, 0.5, 1.0, 1.5, 2.0, 2.5, 3.0], "b")
-        plt.show()
-        first = x_values[0]
+        points_to_fit = kmeans.cluster_centers_
+        sorted_points_to_fit = sorted(points_to_fit, key=lambda k: [k[1], k[0]])
+        hull = ConvexHull(points_to_fit)
+        radios = (sorted_points_to_fit[clusters-1][1] - sorted_points_to_fit[0][1])/2
+        area = hull.area
+        # plt.plot(points_to_fit[hull.vertices, 0], points_to_fit[hull.vertices, 1], 'r--', lw=2)
+        # plt.plot(points_to_fit[hull.vertices[0], 0], points_to_fit[hull.vertices[0], 1], 'ro')
+        # plt.show()
 
-
-
-
-
-
-
-
-
-
-
-
-        result = MyShape()
-        x, y = sample()
+        result = MyShape(hull, np.float32(radios), np.float32(area))
 
         return result
 
@@ -150,6 +132,17 @@ class Assignment5:
 
         return abs(A)/2
 
+    def best_k(self, x_values):
+        wcss = []
+        for i in range(1, 5):
+            kmeans = KMeans(n_clusters=i, init='k-means++', max_iter=300, n_init=10, random_state=0)
+            kmeans.fit(x_values)
+            wcss.append(kmeans.inertia_)
+        plt.plot(range(1, 11), wcss)
+        plt.title('Elbow Method')
+        plt.xlabel('Number of clusters')
+        plt.ylabel('WCSS')
+        plt.show()
 
 
 
@@ -194,7 +187,7 @@ class TestAssignment5(unittest.TestCase):
         shape = ass5.fit_shape(sample=circ, maxtime=30)
         T = time.time() - T
         a = shape.area()
-        self.assertLess(abs(a - np.pi), 0.01)
+        self.assertLess(abs(a - 2*np.pi), 0.01)
         self.assertLessEqual(T, 32)
 
     def test_bezier_fit(self):
