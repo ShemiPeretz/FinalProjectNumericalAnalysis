@@ -78,11 +78,6 @@ class AbstractShape:
     An abstract class that represents a closed shape.
     """
 
-    def __init__(self, hull, radius: np.float32, shape_area: np.float32):
-        self.hull = hull
-        self._radius = radius
-        self.shape_area = shape_area
-
     def sample(self):
         """
         Returns
