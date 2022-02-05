@@ -24,19 +24,18 @@ import time
 import random
 from functionUtils import AbstractShape
 import matplotlib.pyplot as plt
-from sklearn.cluster import KMeans
+from sklearn.cluster import MiniBatchKMeans,DBSCAN
+from collections import Counter
 import scipy
 
 
 
 class MyShape(AbstractShape):
     # change this class with anything you need to implement the shape
-    def __init__(self, hull, shape_area: np.float32):
-        self.hull = hull
+    def __init__(self, shape_area):
         self.shape_area = shape_area
 
     def area(self):
-        print(f"Hull Average Area:{self.shape_area}")
         return self.shape_area
 
 
@@ -94,82 +93,104 @@ class Assignment5:
         n = 0
         while (time.time() - start_time) < maxtime*0.3:
             points.append(sample())
-            if n >= 4999:
+            if n >= 2500:
                 n += 1
                 break
             else:
                 n += 1
 
-        clusters_start = 20
-        clusters = clusters_start
-        hulls = []
-        volumes = []
+        num_of_points = len(points)
+        points_freq = DBSCAN(eps=0.1, min_samples=10).fit(points)
+        labels = points_freq.labels_
+        most_pop = self.popular_points(labels)
+        new_points = [points[i] for i in range(num_of_points) if labels[i] in most_pop]
+
+        clusters = 3
         areas = []
-
-
-        # while time.time() - start_time < maxtime*0.5:
-        #     if c > 30:
-        #         break
-        #     else:
-        #         kmeans.append(KMeans(n_clusters=c, init='k-means++', max_iter=300, n_init=10, random_state=0))
-        #         kmeans[c-3].fit(points)
-        #         distortions.append(kmeans[c-3].inertia_)
-        #         c += 1
-        #
-        # # plot the cost against K values
-        # plt.plot(range(len(distortions)), distortions, color='g', linewidth='3')
-        # plt.xlabel("Value of K")
-        # plt.ylabel("Squared Error (Cost)")
-        # plt.show()  # clear the plot
-        #
-        # for i in range(len(distortions)-2):
-        #     pass
-
-
+        k = []
         while (time.time() - start_time) < maxtime*0.8:
-            if (clusters - clusters_start) > 10:
+            if clusters > 36:
                 break
             else:
-                kmeans = KMeans(n_clusters=clusters, init='k-means++', max_iter=300, n_init=10, random_state=0)
-                kmeans.fit(points)
+                kmeans = MiniBatchKMeans(n_clusters=clusters, random_state=0, batch_size=100)
+                kmeans.fit(new_points)
                 points_to_fit = kmeans.cluster_centers_
                 hull = scipy.spatial.ConvexHull(points_to_fit)
-                hulls.append(hull)
-                areas.append(hull.area / 2)
-                # areas.append(hull.area)
-                volumes.append(hull.volume)
-                clusters += 1
+                areas.append(hull.volume)
+                k.append(clusters)
+                clusters += 3
 
-        avg_area = 0
-        no_areas = 0
-        for i in range(len(areas)-2):
-            if abs(areas[i] - areas[i+1]) <= 0.1:
-                avg_area += areas[i]
-                no_areas += 1
-        avg_area = avg_area/no_areas
+        if (time.time() - start_time) > 0.90 * maxtime:
+            return MyShape(np.float32(np.average(areas)))
 
-        avg_volume = 0
-        no_volumes = 0
-        for i in range(len(volumes)-2):
-            if abs(volumes[i] - volumes[i+1]) <= 0.1:
-                avg_volume += volumes[i]
-                no_volumes += 1
-        avg_volume = avg_volume/no_volumes
+        ak_poly = np.polyfit(k, areas, deg=3)
+        a_for_k = lambda x: ak_poly[0]*x**3 + ak_poly[1]*x**2 + ak_poly[2]*x + ak_poly[3]
+        derivative = 0
+        optimum_k = 0
+        delta_der = 0
 
-        # plt.scatter(kmeans.cluster_centers_[:, 0], kmeans.cluster_centers_[:, 1], s=100, c='red', zorder=5)
-        # plt.show()
-        #
-        # sorted_points_to_fit = sorted(points_to_fit, key=lambda k: [k[1], k[0]])
-        # radios = (sorted_points_to_fit[clusters-1][1] - sorted_points_to_fit[0][1])/2
-        # plt.plot(points_to_fit[hull.vertices, 0], points_to_fit[hull.vertices, 1], 'r', lw=2)
-        # plt.plot(points_to_fit[hull.vertices[0], 0], points_to_fit[hull.vertices[0], 1], 'ro')
-        # plt.show()
+        # for i in range(len(k)):
+        #     if i == 0:
+        #         derivative = scipy.misc.derivative(a_for_k, k[i], dx=1e-6)
+        #     else:
+        #         new_derivative = scipy.misc.derivative(a_for_k, k[i], dx=1e-6)
+        #         if i == 1:
+        #             delta_der = abs(new_derivative - derivative)
+        #             derivative = new_derivative
+        #         elif abs(new_derivative - derivative) <= delta_der:
+        #             optimum_k = i
+        #             delta_der = abs(new_derivative - derivative)
+        #             derivative = new_derivative
+        #         else:
+        #             derivative = new_derivative
 
-        result = MyShape(hulls[4], np.float32(avg_area))
-        # print(f"time for clustering and hull: {time.time() - T}")
-        # print(f"Total time: {time.time() - start_time}")
-        print(f"pi ={np.pi}")
+        deriv_list = []
+        for i in range(len(k)):
+            deriv_list.append(scipy.misc.derivative(a_for_k, k[i], dx=1e-6))
+        optimum_k = deriv_list.index(min(deriv_list))
+
+        if (time.time() - start_time) > 0.95 * maxtime:
+            return MyShape(areas[optimum_k])
+
+        optimum_k -= 2
+        best_k = []
+        best_k_areas = []
+        for i in range(3):
+            if 0 <= (optimum_k + i) <= len(k):
+                best_k.append(k[optimum_k + i])
+            if 0 <= optimum_k + i <= len(k):
+                best_k_areas.append(areas[optimum_k + i])
+
+        best_poly = np.polyfit(best_k, best_k_areas, deg=3)
+        best_poly_func = np.poly1d(best_poly)
+        sum_area = 0
+
+        points_for_sample = np.linspace(best_k[0], best_k[-1], 100)
+        for point in points_for_sample:
+            sum_area += best_poly_func(point)
+        avg_area = sum_area/100
+
+
+        result = MyShape(avg_area)
+
         return result
+
+    def popular_points(self, val_lst):
+        count = Counter(val_lst)
+        times = []
+        for item in count.items():
+            no = item[1]
+            if no/len(val_lst) >= 0.1:
+                times.append(item[0])
+        return times
+
+    def clear_noise(self, points):
+        num_of_points = len(points)
+        points1 = DBSCAN(eps=0.1,min_samples=10).fit(points)
+        labels = points1.labels_
+        most_frequent_labels = self.popular_points(labels)
+        points = [points[i] for i in range(num_of_points) if labels[i] in most_frequent_labels]
+        return points
 
     def trapezoidal_area(self, x, y1, y2):
         return ((y1+y2)*x)/2
@@ -199,20 +220,6 @@ class Assignment5:
             a2 += y_list[j] * x_list[j + 1]
         l = abs(a1 - a2) / 2
         return l
-
-    def best_k(self, x_values):
-        wcss = []
-        for i in range(1, 5):
-            kmeans = KMeans(n_clusters=i, init='k-means++', max_iter=300, n_init=10, random_state=0)
-            kmeans.fit(x_values)
-            wcss.append(kmeans.inertia_)
-        plt.plot(range(1, 11), wcss)
-        plt.title('Elbow Method')
-        plt.xlabel('Number of clusters')
-        plt.ylabel('WCSS')
-        plt.show()
-
-
 
 ##########################################################################
 

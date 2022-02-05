@@ -55,7 +55,6 @@ class Assignment1:
         -------
         The interpolating function.
         """
-        # Get n random numbers (floats) in range of [a,b]
         points_x_values = np.linspace(a, b, num=n)
         points_values = np.zeros([n, 2])
         for i in range(0, n):
@@ -64,14 +63,9 @@ class Assignment1:
         self.interpolated_dict = self.final_poly(points_values)
         return lambda x: self.x_location(x, points_values)
 
-    # find the a & b points
+    def coefs(self, points):
+        n = len(points) - 1
 
-    def get_bezier_coef(self, points):
-        # since the formulas work given that we have n+1 points
-        # then n must be this:
-        n = len(points) - 1  # TODO: give "n" as a parameter to the function, replace the initialization
-
-        # build coefficents matrix
         C = 4 * np.identity(n)
         np.fill_diagonal(C[1:], 1)
         np.fill_diagonal(C[:, 1:], 1)
@@ -79,12 +73,10 @@ class Assignment1:
         C[n - 1, n - 1] = 7
         C[n - 1, n - 2] = 2
 
-        # build points vector
         P = [2 * (2 * points[i] + points[i + 1]) for i in range(n)]
         P[0] = points[0] + 2 * points[1]
         P[n - 1] = 8 * points[n - 1] + points[n]
 
-        # solve system, find a & b
         A = np.linalg.solve(C, P)  # TODO: change to thomas algo!
         B = [0] * n
         for i in range(n - 1):
@@ -93,20 +85,18 @@ class Assignment1:
 
         return A, B
 
-    # returns the general Bezier cubic formula given 4 control points
-    def get_cubic(self, a, b, c, d):
+    def cubic_formula(self, a, b, c, d):
         return lambda t: np.power(1 - t, 3) * a + 3 * np.power(1 - t, 2) * t * b + 3 * (1 - t) * \
                          np.power(t, 2) * c + np.power(t, 3) * d
 
-    # return one cubic curve for each consecutive points
-    def get_bezier_cubic(self, points):
-        A, B = self.get_bezier_coef(points)
+    def bezier_cubic(self, points):
+        A, B = self.coefs(points)
         return {(points[i][0], points[i][1]):
-                self.get_cubic(points[i], A[i], B[i], points[i + 1]) for i in range(len(points) - 1)
+                self.cubic_formula(points[i], A[i], B[i], points[i + 1]) for i in range(len(points) - 1)
                 }
 
-    def final_poly(self, points): # TODO: n is needed?
-        return self.get_bezier_cubic(points)
+    def final_poly(self, points):
+        return self.bezier_cubic(points)
 
     def x_location(self, value_of_x, points):
         start_point = 0
